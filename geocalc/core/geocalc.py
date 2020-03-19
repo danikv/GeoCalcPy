@@ -1,9 +1,11 @@
-import numpy as np
+import math
+
 import constants
-from utils import input_check_Nx3 as _input_check_Nx3
-from utils import input_check_Nx3x3 as _input_check_Nx3x3
+import numpy as np
 from utils import input_check_Nx1 as _input_check_Nx1
+from utils import input_check_Nx3 as _input_check_Nx3
 from utils import positive_angle
+
 
 def earthrad(lat):
     """
@@ -35,13 +37,14 @@ def earthrad(lat):
     >>> Rmeridian
     array([ 6335439.32729283,  6399593.62575849])
     """
-    
+
     lat = np.deg2rad(lat)
 
-    R_N = constants.a/np.sqrt(1-constants.e_sqrd*np.sin(lat)**2)
-    R_M = constants.a*(1-constants.e_sqrd)/(1-constants.e_sqrd*np.sin(lat)**2)**1.5
-    
+    R_N = constants.a / np.sqrt(1 - constants.e_sqrd * np.sin(lat) ** 2)
+    R_M = constants.a * (1 - constants.e_sqrd) / (1 - constants.e_sqrd * np.sin(lat) ** 2) ** 1.5
+
     return R_N, R_M
+
 
 def lla2ecef(lat, lon, alt):
     """
@@ -57,30 +60,29 @@ def lla2ecef(lat, lon, alt):
     -------
     ecef : {(N,3)} array like ecef position, unit is the same as alt_unit
     """
-    lat,N1 = _input_check_Nx1(lat)
-    lon,N2 = _input_check_Nx1(lon)
-    alt,N3 = _input_check_Nx1(alt)
-    
-    if( (N1!=N2) or (N2!=N3) or (N1!=N3) ):
+    lat, N1 = _input_check_Nx1(lat)
+    lon, N2 = _input_check_Nx1(lon)
+    alt, N3 = _input_check_Nx1(alt)
+
+    if ((N1 != N2) or (N2 != N3) or (N1 != N3)):
         raise ValueError('Inputs are not of the same dimension')
-    
-    
-    Rew,Rns = earthrad(lat)
-    
-    
+
+    Rew, Rns = earthrad(lat)
+
     lat = np.deg2rad(lat)
     lon = np.deg2rad(lon)
-    
-    x = (Rew + alt)*np.cos(lat)*np.cos(lon)
-    y = (Rew + alt)*np.cos(lat)*np.sin(lon)
-    z = ( (1-constants.e_sqrd)*Rew + alt )*np.sin(lat)
-    
-    ecef = np.vstack((x,y,z)).T
 
-    if(N1==1):
+    x = (Rew + alt) * np.cos(lat) * np.cos(lon)
+    y = (Rew + alt) * np.cos(lat) * np.sin(lon)
+    z = ((1 - constants.e_sqrd) * Rew + alt) * np.sin(lat)
+
+    ecef = np.vstack((x, y, z)).T
+
+    if (N1 == 1):
         ecef = ecef.reshape(3)
 
     return ecef
+
 
 def ecef2lla(ecef):
     """
@@ -103,20 +105,25 @@ def ecef2lla(ecef):
     lon : {(N,)} array like longitude in unit specified by latlon_unit
     alt : {(N,)} array like altitude in meters
     """
-    ecef,N = _input_check_Nx3(ecef)
-    if(N>1):
-        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    ecef, N = _input_check_Nx3(ecef)
+    if (N > 1):
+        x = ecef[:, 0];
+        y = ecef[:, 1];
+        z = ecef[:, 2]
     else:
-        x = ecef[0]; y = ecef[1]; z = ecef[2]
+        x = ecef[0];
+        y = ecef[1];
+        z = ecef[2]
 
-    p = np.sqrt(x**2 + y**2)
+    p = np.sqrt(x ** 2 + y ** 2)
 
-    theta = np.arctan2((z * constants.a) , (p * constants.b))
+    theta = np.arctan2((z * constants.a), (p * constants.b))
 
-    lon = np.arctan2(y , x)
+    lon = np.arctan2(y, x)
 
-    lat = np.arctan2((z + (constants.e2**2) * constants.b * (np.sin(theta)**3)) , ((p - (constants.e_sqrd) * constants.a * (np.cos(theta)**3))))
-    N = constants.a / (np.sqrt(1 - ((constants.e_sqrd) * (np.sin(lat)**2))))
+    lat = np.arctan2((z + (constants.e2 ** 2) * constants.b * (np.sin(theta) ** 3)),
+                     ((p - (constants.e_sqrd) * constants.a * (np.cos(theta) ** 3))))
+    N = constants.a / (np.sqrt(1 - ((constants.e_sqrd) * (np.sin(lat) ** 2))))
 
     m = (p / np.cos(lat))
     alt = m - N
@@ -153,6 +160,7 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):
     ned = ecef2ned(ecef, lat_ref, lon_ref, alt_ref)
     return ned
 
+
 def ned2lla(ned, lat_ref, lon_ref, alt_ref):
     """
     Calculate the Latitude, Longitude and Altitude of points given by NED coordinates
@@ -175,14 +183,14 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref):
     This method is a wrapper on ned2ecef (add ecef of NED-origin) and ecef2lla.
     """
 
-    ecef = ned2ecef(ned,lat_ref,lon_ref,alt_ref)
+    ecef = ned2ecef(ned, lat_ref, lon_ref, alt_ref)
 
     lla = ecef2lla(ecef)
 
     return lla
 
 
-def ned2ecef(ned,lat_ref,lon_ref,alt_ref):
+def ned2ecef(ned, lat_ref, lon_ref, alt_ref):
     """
     Transform a vector resolved in NED (origin given by lat_ref, lon_ref, and alt_ref)
     coordinates to its ECEF representation. 
@@ -212,44 +220,45 @@ def ned2ecef(ned,lat_ref,lon_ref,alt_ref):
     >>> print("ECEF:", ecef)
     >>> print("Notice that 'down' is not same as 'ecef-z' coordinate.")
     """
-    lat_ref,N1 = _input_check_Nx1(lat_ref)
-    lon_ref,N2 = _input_check_Nx1(lon_ref)
-    alt_ref,N3 = _input_check_Nx1(alt_ref)
-    
-    if( (N1!=1) or (N2!=1) or (N3!=1) ):
+    lat_ref, N1 = _input_check_Nx1(lat_ref)
+    lon_ref, N2 = _input_check_Nx1(lon_ref)
+    alt_ref, N3 = _input_check_Nx1(alt_ref)
+
+    if ((N1 != 1) or (N2 != 1) or (N3 != 1)):
         raise ValueError('Reference Location can only be 1')
-    
-    ned,N = _input_check_Nx3(ned)
+
+    ned, N = _input_check_Nx3(ned)
 
     ned = ned.T
-    
-    C = np.zeros((3,3))
+
+    C = np.zeros((3, 3))
 
     lat_ref = np.deg2rad(lat_ref)
     lon_ref = np.deg2rad(lon_ref)
 
-    C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
-    C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
-    C[0,2]= np.cos(lat_ref)
-    
-    C[1,0]=-np.sin(lon_ref)
-    C[1,1]= np.cos(lon_ref)
-    C[1,2]= 0
+    C[0, 0] = -np.sin(lat_ref) * np.cos(lon_ref)
+    C[0, 1] = -np.sin(lat_ref) * np.sin(lon_ref)
+    C[0, 2] = np.cos(lat_ref)
 
-    C[2,0]=-np.cos(lat_ref)*np.cos(lon_ref)
-    C[2,1]=-np.cos(lat_ref)*np.sin(lon_ref)
-    C[2,2]=-np.sin(lat_ref)
+    C[1, 0] = -np.sin(lon_ref)
+    C[1, 1] = np.cos(lon_ref)
+    C[1, 2] = 0
+
+    C[2, 0] = -np.cos(lat_ref) * np.cos(lon_ref)
+    C[2, 1] = -np.cos(lat_ref) * np.sin(lon_ref)
+    C[2, 2] = -np.sin(lat_ref)
 
     # C defines transoformation: ned = C * ecef.  Hence used transpose.
-    ecef = np.dot(C.T,ned)
+    ecef = np.dot(C.T, ned)
     ecef = ecef.T
 
-    if(N == 1):
+    if (N == 1):
         ecef = ecef.reshape(3)
 
     return ecef
 
-def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
+
+def ecef2ned(ecef, lat_ref, lon_ref, alt_ref):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the NED
     coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
@@ -267,42 +276,42 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
     ned : {(N,3)} array like ecef position, unit is the same as alt_unit
     """
 
-    lat_ref,N1 = _input_check_Nx1(lat_ref)
-    lon_ref,N2 = _input_check_Nx1(lon_ref)
-    alt_ref,N3 = _input_check_Nx1(alt_ref)
-    
-    if( (N1!=1) or (N2!=1) or (N3!=1) ):
+    lat_ref, N1 = _input_check_Nx1(lat_ref)
+    lon_ref, N2 = _input_check_Nx1(lon_ref)
+    alt_ref, N3 = _input_check_Nx1(alt_ref)
+
+    if ((N1 != 1) or (N2 != 1) or (N3 != 1)):
         raise ValueError('Reference Location can only be 1')
-    
-    ecef,N = _input_check_Nx3(ecef)
+
+    ecef, N = _input_check_Nx3(ecef)
 
     ecef = ecef.T
-    
-    C = np.zeros((3,3))
+
+    C = np.zeros((3, 3))
 
     lat_ref = np.deg2rad(lat_ref)
     lon_ref = np.deg2rad(lon_ref)
 
+    C[0, 0] = -np.sin(lat_ref) * np.cos(lon_ref)
+    C[0, 1] = -np.sin(lat_ref) * np.sin(lon_ref)
+    C[0, 2] = np.cos(lat_ref)
 
-    C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
-    C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
-    C[0,2]= np.cos(lat_ref)
-	
-    C[1,0]=-np.sin(lon_ref)
-    C[1,1]= np.cos(lon_ref)
-    C[1,2]= 0
+    C[1, 0] = -np.sin(lon_ref)
+    C[1, 1] = np.cos(lon_ref)
+    C[1, 2] = 0
 
-    C[2,0]=-np.cos(lat_ref)*np.cos(lon_ref)
-    C[2,1]=-np.cos(lat_ref)*np.sin(lon_ref)
-    C[2,2]=-np.sin(lat_ref)
+    C[2, 0] = -np.cos(lat_ref) * np.cos(lon_ref)
+    C[2, 1] = -np.cos(lat_ref) * np.sin(lon_ref)
+    C[2, 2] = -np.sin(lat_ref)
 
-    ned = np.dot(C,ecef)
+    ned = np.dot(C, ecef)
     ned = ned.T
 
-    if(N == 1):
+    if (N == 1):
         ned = ned.reshape(3)
 
     return ned
+
 
 def ecef2polar(ecef, ecef_ref):
     """
@@ -319,14 +328,18 @@ def ecef2polar(ecef, ecef_ref):
     polar : range, bearing, elevation
     """
     ecef = np.array(ecef) - np.array(ecef_ref)
-    ecef,N = _input_check_Nx3(ecef)
-    if(N>1):
-        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    ecef, N = _input_check_Nx3(ecef)
+    if (N > 1):
+        x = ecef[:, 0];
+        y = ecef[:, 1];
+        z = ecef[:, 2]
     else:
-        x = ecef[0]; y = ecef[1]; z = ecef[2]
+        x = ecef[0];
+        y = ecef[1];
+        z = ecef[2]
 
-    r = np.sqrt(x**2 + y**2 + z**2)
-    elevation = np.rad2deg(np.arctan2(np.sqrt(x**2 + y**2) , z))
+    r = np.sqrt(x ** 2 + y ** 2 + z ** 2)
+    elevation = np.rad2deg(np.arctan2(np.sqrt(x ** 2 + y ** 2), z))
     bearing = positive_angle(np.rad2deg(constants.half_pi - np.arctan2(y, x)))
     return r, bearing, elevation
 
@@ -350,6 +363,7 @@ def lla2polar(lat, lon, alt, lat_ref, lon_ref, alt_ref):
     ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
     return ecef2polar(ecef, ecef_ref)
 
+
 def polar2ecef(r, bearing, elevation, ecef_ref):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the Polar
@@ -364,17 +378,22 @@ def polar2ecef(r, bearing, elevation, ecef_ref):
     -------
     polar : range, bearing, elevation
     """
-    ecef,N = _input_check_Nx3(ecef_ref)
-    if(N>1):
-        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    ecef, N = _input_check_Nx3(ecef_ref)
+    if (N > 1):
+        x = ecef[:, 0];
+        y = ecef[:, 1];
+        z = ecef[:, 2]
     else:
-        x = ecef[0]; y = ecef[1]; z = ecef[2]
+        x = ecef[0];
+        y = ecef[1];
+        z = ecef[2]
 
     bearing, elevation = constants.half_pi - np.deg2rad(bearing), np.deg2rad(elevation)
     x = r * np.cos(bearing) * np.sin(elevation)
     y = r * np.sin(bearing) * np.sin(elevation)
     z = r * np.cos(elevation)
     return np.array([x, y, z]) + np.array(ecef_ref)
+
 
 def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     """
@@ -390,7 +409,17 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     -------
     polar : range, bearing, elevation
     """
-    
+
     ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
     ecef = polar2ecef(r, bearing, elevation, ecef_ref)
     return ecef2lla(ecef)
+
+
+def cartesian2directional(vx, vy, vz):
+    speed = math.sqrt(vx * vx + vy * vy)
+    if vx == 0:
+        raise ValueError('vx is 0. Cant divide by zero.')
+    course = math.degrees(math.atan(vy / vx))
+    return speed, course, vz
+
+

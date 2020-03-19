@@ -1,15 +1,17 @@
 import unittest
+
 import geocalc
+
 
 class CoordinatesConverterTests(unittest.TestCase):
     def test_lla2ecef(self):
         lat, lon, alt = 30, 31, 100
         ecef = geocalc.lla2ecef(lat, lon, alt)
-        x, y , z = ecef[0], ecef[1], ecef[2]
+        x, y, z = ecef[0], ecef[1], ecef[2]
         self.assertAlmostEqual(x, 4738715.05395, places=4)
         self.assertAlmostEqual(y, 2847307.26071, places=4)
         self.assertAlmostEqual(z, 3170423.73533, places=4)
-    
+
     def test_ecef2lla(self):
         x, y, z = 4738715.05, 2847307.26, 3170423.73
         lat, lon, alt = geocalc.ecef2lla([x, y, z])
@@ -64,10 +66,17 @@ class CoordinatesConverterTests(unittest.TestCase):
         r, bearing, azimuth = 147267.53459829, 300.16393546, 49.04826534
         x_ref, y_ref, z_ref = 4834879.70745, 2791419.10059, 3073901.20054
         ecef = geocalc.polar2ecef(r, bearing, azimuth, [x_ref, y_ref, z_ref])
-        x, y , z = ecef[0], ecef[1], ecef[2]
+        x, y, z = ecef[0], ecef[1], ecef[2]
         self.assertAlmostEqual(x, 4738715.05395, places=4)
         self.assertAlmostEqual(y, 2847307.26071, places=4)
         self.assertAlmostEqual(z, 3170423.73533, places=4)
+
+    def test_cartesian2directional(self):
+        vx, vy, vz = 21, 12.2, 100
+        speed, course, vz = geocalc.cartesian2directional(vx, vy, vz)
+        self.assertAlmostEqual(speed, 24.3, places=1)
+        self.assertAlmostEqual(course, 30, places=0)
+        self.assertAlmostEqual(vz, 100, places=1)
 
 
 if __name__ == '__main__':

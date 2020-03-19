@@ -28,28 +28,6 @@ References
        http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf
        Accessed on Nov. 19, 2013 
 
-Examples
---------
-Note, examples don't print full precision.
-
->>> import wgs84
->>> print(wgs84.a)
-6378137.0
->>> print(wgs84.f)
-0.00335281066475
->>> print(wgs84.omega_E)
-7.292115e-05
->>> print(wgs84.GM)
-3.986004418e+14
->>> print(wgs84.GM_GPS)
-3.986005e+14
->>> 
->>> print(wgs84._b)
-6356752.3142
->>> print(wgs84._ecc)
-0.0818191908426
->>> print(wgs84._ecc_sqrd)
-0.00669437999014
 """
 import numpy as np
 

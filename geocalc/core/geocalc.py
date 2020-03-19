@@ -264,13 +264,8 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
     Returns
     -------
     ned : {(N,3)} array like ecef position, unit is the same as alt_unit
-    
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from navpy import ecef2ned
-    >>> lat 
     """
+
     lat_ref,N1 = _input_check_Nx1(lat_ref)
     lon_ref,N2 = _input_check_Nx1(lon_ref)
     alt_ref,N3 = _input_check_Nx1(alt_ref)
@@ -307,3 +302,95 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
         ned = ned.reshape(3)
 
     return ned
+
+
+def ecef2polar(ecef, ecef_ref):
+    """
+    Transform a vector resolved in ECEF coordinate to its resolution in the Polar
+    coordinate.
+    
+    Parameters
+    ----------
+    ecef : {(N,3)} input vector expressed in the ECEF frame
+    ecef_ref : {(N,3)} reference vector expressed in the ECEF frame
+    
+    Returns
+    -------
+    polar : range, bearing, elevation
+    """
+    ecef = np.array(ecef) - np.array(ecef_ref)
+    ecef,N = _input_check_Nx3(ecef)
+    if(N>1):
+        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    else:
+        x = ecef[0]; y = ecef[1]; z = ecef[2]
+
+    r = np.sqrt(x**2 + y**2 + z**2)
+    elevation = np.rad2deg(np.arctan2(np.sqrt(x**2 + y**2) , z))
+    bearing = np.rad2deg(np.arctan2(y, x))
+    return r, bearing, elevation
+
+
+def lla2polar(lat, lon, alt, lat_ref, lon_ref, alt_ref):
+    """
+    Transform a vector resolved in LLA coordinate to its resolution in the Polar
+    coordinate.
+    
+    Parameters
+    ----------
+    lla : lat, long, alt input coordiantes
+    lla : lat, long, alt reference input coordinates
+    
+    Returns
+    -------
+    polar : range, bearing, elevation
+    """
+
+    ecef = lla2ecef(lat, lon, alt)
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
+    return ecef2polar(ecef, ecef_ref)
+
+def polar2ecef(r, bearing, elevation, ecef_ref):
+    """
+    Transform a vector resolved in ECEF coordinate to its resolution in the Polar
+    coordinate.
+    
+    Parameters
+    ----------
+    range, bearing, elevation : {(N,3)} input vector expressed in the Polar coordinates
+    ecef_ref : {(N,3)} reference vector expressed in the ECEF frame
+    
+    Returns
+    -------
+    polar : range, bearing, elevation
+    """
+    ecef,N = _input_check_Nx3(ecef_ref)
+    if(N>1):
+        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    else:
+        x = ecef[0]; y = ecef[1]; z = ecef[2]
+
+    bearing, elevation = np.deg2rad(bearing), np.deg2rad(elevation)
+    x = r * np.cos(bearing) * np.sin(elevation)
+    y = r * np.sin(bearing) * np.sin(elevation)
+    z = r * np.cos(elevation)
+    return np.array([x, y, z]) + np.array(ecef_ref)
+
+def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
+    """
+    Transform a vector resolved in ECEF coordinate to its resolution in the Polar
+    coordinate.
+    
+    Parameters
+    ----------
+    range, bearing, elevation : {(N,3)} input vector expressed in the Polar coordinates
+    lat, lon, alt reference : {(N,3)} reference vector expressed in the LLA coordinates
+    
+    Returns
+    -------
+    polar : range, bearing, elevation
+    """
+    
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
+    ecef = polar2ecef(r, bearing, elevation, ecef_ref)
+    return ecef2lla(ecef)

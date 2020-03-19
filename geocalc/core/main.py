@@ -6,9 +6,9 @@ class CoordinatesConverterTests(unittest.TestCase):
         lat, lon, alt = 30, 31, 100
         ecef = geocalc.lla2ecef(lat, lon, alt)
         x, y , z = ecef[0], ecef[1], ecef[2]
-        self.assertAlmostEqual(x, 4738715.05, places=1)
-        self.assertAlmostEqual(y, 2847307.26, places=1)
-        self.assertAlmostEqual(z, 3170423.73, places=1)
+        self.assertAlmostEqual(x, 4738715.05395, places=4)
+        self.assertAlmostEqual(y, 2847307.26071, places=4)
+        self.assertAlmostEqual(z, 3170423.73533, places=4)
     
     def test_ecef2lla(self):
         x, y, z = 4738715.05, 2847307.26, 3170423.73
@@ -51,6 +51,23 @@ class CoordinatesConverterTests(unittest.TestCase):
         self.assertAlmostEqual(north, 93129.29, places=1)
         self.assertAlmostEqual(east, 96482.89, places=1)
         self.assertAlmostEqual(down, -6371513.44, places=1)
+
+    def test_ecef2polar(self):
+        x, y, z = 4738715.05395, 2847307.26071, 3170423.73533
+        x_ref, y_ref, z_ref = 4834879.70745, 2791419.10059, 3073901.20054
+        r, bearing, azimuth = geocalc.ecef2polar([x, y, z], [x_ref, y_ref, z_ref])
+        self.assertAlmostEqual(r, 147267.53459829, places=7)
+        self.assertAlmostEqual(bearing, 149.8360645, places=7)
+        self.assertAlmostEqual(azimuth, 49.04826534, places=7)
+
+    def test_polar2ecef(self):
+        r, bearing, azimuth = 147267.53459829, 149.8360645, 49.04826534
+        x_ref, y_ref, z_ref = 4834879.70745, 2791419.10059, 3073901.20054
+        ecef = geocalc.polar2ecef(r, bearing, azimuth, [x_ref, y_ref, z_ref])
+        x, y , z = ecef[0], ecef[1], ecef[2]
+        self.assertAlmostEqual(x, 4738715.05395, places=4)
+        self.assertAlmostEqual(y, 2847307.26071, places=4)
+        self.assertAlmostEqual(z, 3170423.73533, places=4)
 
 
 if __name__ == '__main__':

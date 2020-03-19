@@ -34,4 +34,4 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        python3 -m pytest geocalc/core/*_tests.py
+        python3 -m pytest geocalc/tests/*

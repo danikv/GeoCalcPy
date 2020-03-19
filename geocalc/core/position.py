@@ -1,5 +1,3 @@
-import math
-
 import constants
 import numpy as np
 from utils import input_check_Nx1 as _input_check_Nx1
@@ -413,13 +411,3 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
     ecef = polar2ecef(r, bearing, elevation, ecef_ref)
     return ecef2lla(ecef)
-
-
-def cartesian2directional(vx, vy, vz):
-    speed = math.sqrt(vx * vx + vy * vy)
-    if vx == 0:
-        raise ValueError('vx is 0. Cant divide by zero.')
-    course = math.degrees(math.atan(vy / vx))
-    return speed, course, vz
-
-

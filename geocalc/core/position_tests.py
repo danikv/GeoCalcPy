@@ -71,13 +71,6 @@ class CoordinatesConverterTests(unittest.TestCase):
         self.assertAlmostEqual(y, 2847307.26071, places=4)
         self.assertAlmostEqual(z, 3170423.73533, places=4)
 
-    def test_cartesian2directional(self):
-        vx, vy, vz = 21, 12.2, 100
-        speed, course, vz = geocalc.cartesian2directional(vx, vy, vz)
-        self.assertAlmostEqual(speed, 24.3, places=1)
-        self.assertAlmostEqual(course, 30, places=0)
-        self.assertAlmostEqual(vz, 100, places=1)
-
 
 if __name__ == '__main__':
     unittest.main()

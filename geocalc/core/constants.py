@@ -55,3 +55,6 @@ f = 0.0034
 e = np.sqrt(((a**2) - (b**2)) / (a**2))
 e2 = np.sqrt(((a**2) - (b**2)) /(b**2))
 e_sqrd = e**2
+half_pi = np.pi / 2
+half_pi_degree = 90.0
+two_pi_degree = 360.0

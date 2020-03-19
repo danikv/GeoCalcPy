@@ -6,6 +6,7 @@ LICENSE.txt
 """
 
 import numpy as _np
+import constants
 import sys
 
 def input_check_Nx1(x):
@@ -172,3 +173,6 @@ def status_update(i, drl, message, bar_length=20):
     sys.stdout.write("\r[%s] %3d%% :: %s" %
                      (hashes + spaces, int(round(percent * 100)), mmsg))
     sys.stdout.flush()
+
+def positive_angle(angle):
+    return (constants.two_pi_degree + angle) % constants.two_pi_degree

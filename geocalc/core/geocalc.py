@@ -1,8 +1,9 @@
 import numpy as np
-import wgs84
+import constants
 from utils import input_check_Nx3 as _input_check_Nx3
 from utils import input_check_Nx3x3 as _input_check_Nx3x3
 from utils import input_check_Nx1 as _input_check_Nx1
+from utils import positive_angle
 
 def earthrad(lat):
     """
@@ -37,8 +38,8 @@ def earthrad(lat):
     
     lat = np.deg2rad(lat)
 
-    R_N = wgs84.a/np.sqrt(1-wgs84.e_sqrd*np.sin(lat)**2)
-    R_M = wgs84.a*(1-wgs84.e_sqrd)/(1-wgs84.e_sqrd*np.sin(lat)**2)**1.5
+    R_N = constants.a/np.sqrt(1-constants.e_sqrd*np.sin(lat)**2)
+    R_M = constants.a*(1-constants.e_sqrd)/(1-constants.e_sqrd*np.sin(lat)**2)**1.5
     
     return R_N, R_M
 
@@ -72,7 +73,7 @@ def lla2ecef(lat, lon, alt):
     
     x = (Rew + alt)*np.cos(lat)*np.cos(lon)
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
-    z = ( (1-wgs84.e_sqrd)*Rew + alt )*np.sin(lat)
+    z = ( (1-constants.e_sqrd)*Rew + alt )*np.sin(lat)
     
     ecef = np.vstack((x,y,z)).T
 
@@ -110,12 +111,12 @@ def ecef2lla(ecef):
 
     p = np.sqrt(x**2 + y**2)
 
-    theta = np.arctan2((z * wgs84.a) , (p * wgs84.b))
+    theta = np.arctan2((z * constants.a) , (p * constants.b))
 
     lon = np.arctan2(y , x)
 
-    lat = np.arctan2((z + (wgs84.e2**2) * wgs84.b * (np.sin(theta)**3)) , ((p - (wgs84.e_sqrd) * wgs84.a * (np.cos(theta)**3))))
-    N = wgs84.a / (np.sqrt(1 - ((wgs84.e_sqrd) * (np.sin(lat)**2))))
+    lat = np.arctan2((z + (constants.e2**2) * constants.b * (np.sin(theta)**3)) , ((p - (constants.e_sqrd) * constants.a * (np.cos(theta)**3))))
+    N = constants.a / (np.sqrt(1 - ((constants.e_sqrd) * (np.sin(lat)**2))))
 
     m = (p / np.cos(lat))
     alt = m - N
@@ -303,7 +304,6 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref):
 
     return ned
 
-
 def ecef2polar(ecef, ecef_ref):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the Polar
@@ -327,7 +327,7 @@ def ecef2polar(ecef, ecef_ref):
 
     r = np.sqrt(x**2 + y**2 + z**2)
     elevation = np.rad2deg(np.arctan2(np.sqrt(x**2 + y**2) , z))
-    bearing = np.rad2deg(np.arctan2(y, x))
+    bearing = positive_angle(np.rad2deg(constants.half_pi - np.arctan2(y, x)))
     return r, bearing, elevation
 
 
@@ -370,7 +370,7 @@ def polar2ecef(r, bearing, elevation, ecef_ref):
     else:
         x = ecef[0]; y = ecef[1]; z = ecef[2]
 
-    bearing, elevation = np.deg2rad(bearing), np.deg2rad(elevation)
+    bearing, elevation = constants.half_pi - np.deg2rad(bearing), np.deg2rad(elevation)
     x = r * np.cos(bearing) * np.sin(elevation)
     y = r * np.sin(bearing) * np.sin(elevation)
     z = r * np.cos(elevation)

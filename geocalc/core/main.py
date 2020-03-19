@@ -57,11 +57,11 @@ class CoordinatesConverterTests(unittest.TestCase):
         x_ref, y_ref, z_ref = 4834879.70745, 2791419.10059, 3073901.20054
         r, bearing, azimuth = geocalc.ecef2polar([x, y, z], [x_ref, y_ref, z_ref])
         self.assertAlmostEqual(r, 147267.53459829, places=7)
-        self.assertAlmostEqual(bearing, 149.8360645, places=7)
+        self.assertAlmostEqual(bearing, 300.16393546, places=7)
         self.assertAlmostEqual(azimuth, 49.04826534, places=7)
 
     def test_polar2ecef(self):
-        r, bearing, azimuth = 147267.53459829, 149.8360645, 49.04826534
+        r, bearing, azimuth = 147267.53459829, 300.16393546, 49.04826534
         x_ref, y_ref, z_ref = 4834879.70745, 2791419.10059, 3073901.20054
         ecef = geocalc.polar2ecef(r, bearing, azimuth, [x_ref, y_ref, z_ref])
         x, y , z = ecef[0], ecef[1], ecef[2]

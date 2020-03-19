@@ -7,7 +7,7 @@ LICENSE.txt
 
 import sys
 
-import constants
+from geocalc.core import constants
 import numpy as _np
 from pip._vendor.distlib.compat import raw_input
 

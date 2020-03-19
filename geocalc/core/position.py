@@ -1,8 +1,9 @@
-import constants
 import numpy as np
-from utils import input_check_Nx1 as _input_check_Nx1
-from utils import input_check_Nx3 as _input_check_Nx3
-from utils import positive_angle
+
+from geocalc.core import constants
+from geocalc.core.utils import input_check_Nx1 as _input_check_Nx1
+from geocalc.core.utils import input_check_Nx3 as _input_check_Nx3
+from geocalc.core.utils import positive_angle
 
 
 def earthrad(lat):

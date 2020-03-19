@@ -1,7 +1,8 @@
 import unittest
 
 import numpy.testing
-import uncertainty
+
+from geocalc.core import uncertainty
 
 
 class UncertaintyConversionTests(unittest.TestCase):

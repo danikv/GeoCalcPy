@@ -1,6 +1,6 @@
 import unittest
 
-import position
+from geocalc.core import position
 
 
 class CoordinatesConverterTests(unittest.TestCase):

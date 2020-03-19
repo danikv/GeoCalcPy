@@ -1,6 +1,6 @@
 import unittest
 
-import velocity
+from geocalc.core import velocity
 
 
 class MyTestCase(unittest.TestCase):

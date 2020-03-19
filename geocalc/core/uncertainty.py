@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 
 def convert_uncertainty_matrix_to_ellipse(uncertainty, sigma=3):

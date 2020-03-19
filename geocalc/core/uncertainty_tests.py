@@ -1,6 +1,7 @@
 import unittest
-import uncertainty
+
 import numpy.testing
+import uncertainty
 
 
 class UncertaintyConversionTests(unittest.TestCase):

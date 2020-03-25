@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 from geocalc.core import constants
 from geocalc.core.utils import input_check_Nx1 as _input_check_Nx1
@@ -412,3 +413,17 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
     ecef = polar2ecef(r, bearing, elevation, ecef_ref)
     return ecef2lla(ecef)
+
+def enu2polar(x_east, y_north, z_up):
+    projected_range = math.sqrt(x_east * x_east + y_north * y_north)
+    range = math.sqrt(projected_range*projected_range + z_up * z_up)
+    bearing = math.acos(y_north / projected_range)
+    elevation = math.atan(z_up, projected_range)
+    return range, bearing, elevation
+
+def polar2enu(range, bearing, elevation):
+    projected_range = range * math.cos(elevation)
+    x_east = projected_range * math.sin(bearing)
+    y_north = projected_range * math.cos(bearing)
+    z_up = range * math.sin(elevation)
+    return x_east, y_north, z_up

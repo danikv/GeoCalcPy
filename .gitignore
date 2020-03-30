@@ -131,3 +131,6 @@ dmypy.json
 .idea/
 /tmp/
 /polar-conversions.synctex.gz
+/polar-tmp.pdf
+/polar-tmp.synctex.gz
+/polar-conversions.pdf

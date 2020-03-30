@@ -1,14 +1,14 @@
 #TeXlipse project settings
-#Thu Mar 26 00:02:08 IST 2020
-markTmpDer=true
-builderNum=2
+#Mon Mar 30 23:13:51 IDT 2020
 outputDir=
-makeIndSty=
-bibrefDir=
-outputFormat=pdf
-tempDir=tmp
-mainTexFile=polar-conversions.tex
-outputFile=polar-conversions.pdf
-langSpell=en
 markDer=true
+mainTexFile=polar-conversions.tex
+bibrefDir=
+builderNum=2
+outputFile=polar-conversions.pdf
+makeIndSty=
 srcDir=
+markTmpDer=true
+tempDir=tmp
+outputFormat=pdf
+langSpell=en

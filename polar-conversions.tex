@@ -1,12 +1,13 @@
-%%This is a very basic article template.
-%%There is just one section and two subsections.
 \documentclass{article}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage{pdfpages}
+\usepackage{float}
+
 \newcommand{\east}{e_e}
 \newcommand{\north}{e_n}
-\newcommand{\up}{e_n}
+\newcommand{\up}{e_u}
 \newcommand{\range}{e_r}
 \newcommand{\bearing}{e_\theta}
 \newcommand{\elevation}{e_\phi}
@@ -16,22 +17,19 @@
 \newcommand{\carvec}{\hat{e_{c}}}
 \newcommand{\polvec}{\hat{e_{p}}}
 
-
 \begin{document}
 
-\section{Coordinate Conversions}
+\section{Coordinate Conversions From Spherical to Cartesian}
 
-\subsection{Spherical Coordinate system}
+\subsection{Notations}
+\subsubsection{Spherical Coordinate system}
 In the polar coordinate system we represent the location of the target in terms
 of range, bearing and elevation. where range denotes the distance away from the
 target's position, bearing denotes the angle to the target (taken from the north
 axis), and elevation denotes the angle between the tanget plan and the target.
 
-\begin{figure}[h]\label{fig:spherical}
-\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/spherical}
-\end{figure}
 
-\subsection{Cooridnate system representation}
+\subsubsection{Cooridnate system representation}
 
 We denote by $\carvec=(\east,\north, \up)$ the column vector that represents
 the the coordinate system in ENU terms. each $\east,\north, \up$ is a unit vector
@@ -45,18 +43,33 @@ direction, respectively.
 
 \subsection{Conversion from one system to the other}
 
+\subsubsection{Position conversions}
 Let $\vec{p} = (x,y,z) \cdot \carvec = x\east + y\north + z\up$ denote the
-position of the target. We would like to convert the vector $\carvec$ to spherical
-coordinates $\polvec$.
-Clearly, for the position we have:
+position of the target.
 
-\begin{align}
+
+\paragraph{Conversion of position from spherical to cartesian:}
+\begin{align}\label{eq:cartesian-position}
 \begin{split}
 {}& x=r\sin \theta \cos \phi \\
 {}& y=r\cos \theta \cos \phi \\
 {}& z=r\sin \phi
 \end{split}
 \end{align}
+
+
+\paragraph{Conversion of position from cartesian to spherical:}
+\begin{align}\label{eq:polar-position}
+\begin{split}
+{}& r= \sqrt{x^2 + y^2 + z^2} \\
+{}& \theta= \arctan \frac{x}{y} \\
+{}& \phi = \arctan \frac{z}{\sqrt{x^2 + y^2}}
+\end{split}
+\end{align}
+
+\subsubsection{Unit conversions}
+ We would like to convert the vector $\carvec$ to spherical
+coordinates $\polvec$.
 
 That is, $\vec{p} = r\sin \theta \cos \phi \east + r\cos \theta \cos \phi \north +
 r\sin \phi \up = r( \sin \theta \cos \phi \east + \cos \theta \cos \phi \north +
@@ -134,7 +147,7 @@ is unitary matrix.
   \end{pmatrix}
 \end{equation}
 
-\subsection{Velocity conversion}
+\subsubsection{Velocity conversions}
 Let $\vec{v}$ denote the velocity vector. We denote by $\rrate, \brate, \erate$ the terms: range-rate, bearing-rate,
 elevation-rate.
 In spherical coordinate system, the
@@ -166,7 +179,20 @@ Which concludes to:
 \vec{v} = \rrate \range + r \brate \cos \phi \bearing + r \erate \elevation 
 \end{equation}
 
-\subsection{Conversion from spherical to cartesian}
+\paragraph{Conversion of position from spherical to cartesian:}
+Using Equations~\ref{eq:polar-position} and standard derivation we obtain:
+
+\begin{align}
+\begin{split}
+{}& \rrate= \frac{x\dot{x}+y\dot{y}+z\dot{z}}{\sqrt{x^2 + y^2 + z^2}} \\
+{}& \brate= \frac{\dot{x}y-x\dot{y}}{x^2+y^2}
+\\
+{}& \erate = \frac{\dot{z}(x^2+y^2) - z(x\dot{x}+y\dot{y})}{\sqrt{x^2+y^2}(x^2 +
+y^2 + z^2)}
+\end{split}
+\end{align}
+
+\paragraph{Conversion of position from cartesian to spherical:}
 Using Equations~\ref{eq:matrix} and~\ref{eq:velocity-polar}, we deduce:
 
 
@@ -178,7 +204,7 @@ Using Equations~\ref{eq:matrix} and~\ref{eq:velocity-polar}, we deduce:
   \end{pmatrix}
   \qquad
   = \begin{pmatrix}
-    \rrate & \brate \cos \phi & \erate
+    \rrate & r\brate \cos \phi & r\erate
   \end{pmatrix}
   \qquad
   \begin{pmatrix}
@@ -187,9 +213,89 @@ Using Equations~\ref{eq:matrix} and~\ref{eq:velocity-polar}, we deduce:
     \elevation
   \end{pmatrix}
   = \begin{pmatrix}
-    \rrate & \brate \cos \phi & \erate
+    \rrate & r\brate \cos \phi & r\erate
   \end{pmatrix} (\Sigma \carvec)
 \end{equation}
 
+Hence,
+
+
+\begin{align}
+\begin{split}
+{}& v_x= \rrate \sin \theta \cos \phi + r 
+\brate \cos \theta \cos \phi - r \erate \sin \theta \sin \phi \\
+{}& v_y=\rrate \cos \theta \cos \phi -r \brate \sin \theta \cos \phi - r \erate
+\cos \theta \sin \phi
+\\
+{}& v_z= \rrate \sin \phi + r \erate \cos \phi
+\end{split}
+\end{align}
+
+\subsubsection{Covariance Matrix Conversions}
+The transformation of coordinates for the covariance matrices $P$ and $Q$ is
+determined by the Jacobian matrix $J$ as described in the formula: (cf.
+Appendix) $P = J Q J^T$.
+
+\paragraph{Conversion of covariance from spherical to cartesian:}
+Given a diagonal matrix $(\theta, r, \phi)$, the jacobian of $(x,y,z)$ with
+respect to $(\theta, r, \phi)$ is:
+
+
+\begin{equation}\label{jacobian:position-cartesian}
+\begin{pmatrix}
+    r \cos \theta \cos \phi &  \sin \theta \cos \phi & -r \sin \theta \sin
+    \phi\\
+    -r \sin \theta \cos
+    \phi & \cos \theta \cos \phi & -r \cos \theta \sin \phi \\
+    0 & \sin \phi & r\cos \phi
+  \end{pmatrix}
+\end{equation}
+
+
+Given a diagonal matrix $(\theta,\brate, r, \rrate, \phi, \erate)$ the jacobian of
+$(x,\dot{x},y,\dot{y},z,\dot{z})$ with respect to $(\theta,\brate, r, \rrate,
+\phi, \erate)$ is:
+
+
+\begin{figure}[h]\label{fig:spherical}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/cartesian-covariance1}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/cartesian-covariance2}
+\end{figure}
+
+As described in pages 14-16.
+
+
+\paragraph{Conversion of covariance from spherical to cartesian:}
+Given a diagonal matrix $(x,y,z)$, the jacobian of $(\theta, r, \phi)$ with
+respect to $(x,y,z)$ is:
+
+
+\begin{equation}\label{jacobian:position-cartesian}
+\begin{pmatrix}
+    \frac{y}{x^2+y^2} & \frac{x}{x^2+y^2} & 0
+    \\
+    \frac{x}{r} & \frac{y}{r} & \frac{z}{r} \\
+    \frac{xz}{r^2\sqrt{x^2+y^2}} & \frac{yz}{r^2\sqrt{x^2+y^2}} &
+    \frac{\sqrt{x^2+y^2}}{r^2}
+  \end{pmatrix}
+\end{equation}
+
+
+Given a diagonal matrix $(x,\dot{x},y,\dot{y},z,\dot{z})$,the jacobian of
+$(x,\dot{x},y,\dot{y},z,\dot{z})$ with respect to $(\theta,\brate, r, \rrate, \phi, \erate)$ is:
+
+
+\begin{figure}[H]\label{fig:spherical}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/spherical-covariance1}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/spherical-covariance2}
+\end{figure}
+
+As described in pages 11-13.
+
+%\newpage
+
+
+\section{Appendix}
+\includepdf[pages=1-6,pagecommand={},width=\textwidth]{tsg/tsg.pdf}
 
 \end{document}

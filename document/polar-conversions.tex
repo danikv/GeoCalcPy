@@ -19,6 +19,44 @@
 
 \begin{document}
 
+\title{Cooridinate System Conversions}
+\maketitle
+\section{Geographic coordinate system \& ECEF}
+
+\subsection{LLH to ECEF}
+
+Geodetic coordinates (latitude  $\phi$, longitude   $\lambda$, height $h$) can
+be converted into ECEF coordinates using the following equation:
+
+\begin{align*}
+\begin{split}
+& X = ( R(\phi) + h) \cos \phi \cos \lambda \\ 
+& Y = ( R(\phi) + h) \cos \phi \sin \lambda \\
+& Z = ( \frac{b^2}{a^2}R(\phi) + h) \sin \phi 
+\end{split}
+\end{align*}
+
+where:
+\begin{equation}
+R(\phi) = \frac{a^2}{\sqrt{a^2 \cos ^2 \phi + b^2 \sin ^2 \phi}}
+\end{equation}
+
+In the above equation, $a$ and $b$ are the equatorial radius
+(semi-major axis) and the polar radius (semi-minor axis), respectively.
+
+\subsection{ECEF to LLH}
+A number of techniques and algorithms are available but the most accurate,
+according to Zhu~\cite{zhu}, is the following procedure established by
+Heikkinen~\cite{heikkinen1982geschlossene}, as cited by Zhu.
+
+
+\begin{figure}[h]\label{fig:ecef2llh}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight,keepaspectratio]{figures/ecef2llh}
+\end{figure}
+
+See also~\cite{osen2017accurate}.
+
+
 \section{Coordinate Conversions From Spherical to Cartesian}
 
 \subsection{Notations}
@@ -294,6 +332,8 @@ As described in pages 11-13.
 
 %\newpage
 
+\bibliographystyle{plainurl}
+\bibliography{bibliography}
 
 \section{Appendix}
 \includepdf[pages=1-6,pagecommand={},width=\textwidth]{tsg/tsg.pdf}

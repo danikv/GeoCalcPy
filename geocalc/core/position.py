@@ -7,81 +7,13 @@ from geocalc.core.utils import input_check_Nx3 as _input_check_Nx3
 from geocalc.core.utils import positive_angle
 
 
-def earthrad(lat):
-    """
-    Calculate radius of curvature in the prime vertical (East-West) and 
-    meridian (North-South) at a given latitude.
-    Parameters
-    ----------
-    lat : {(N,)} array like latitude, unit specified by lat_unit, default in deg
-    
-    Returns
-    -------
-    R_N : {(N,)} array like, radius of curvature in the prime vertical (East-West)
-    R_M : {(N,)} array like, radius of curvature in the meridian (North-South)
-    
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from navpy import earthrad
-    >>> lat = 0
-    >>> Rtransverse, Rmeridian = earthrad(lat)
-    >>> Rtransverse
-    6378137.0
-    >>> Rmeridian
-    6335439.3272928288
-    >>> lat = [0, np.pi/2]
-    >>> Rtransverse, Rmeridian = earthrad(lat,lat_unit='rad')
-    >>> Rtransverse
-    array([ 6378137.        ,  6399593.62575849])
-    >>> Rmeridian
-    array([ 6335439.32729283,  6399593.62575849])
-    """
-
-    lat = np.deg2rad(lat)
-
-    R_N = constants.a / np.sqrt(1 - constants.e_sqrd * np.sin(lat) ** 2)
-    R_M = constants.a * (1 - constants.e_sqrd) / (1 - constants.e_sqrd * np.sin(lat) ** 2) ** 1.5
-
-    return R_N, R_M
-
-
-def lla2ecef(lat, lon, alt):
-    """
-    Convert Latitude, Longitude, Altitude, to ECEF position
-    
-    Parameters
-    ----------
-    lat : {(N,)} array like latitude, unit specified by latlon_unit, default in deg
-    lon : {(N,)} array like longitude, unit specified by latlon_unit, default in deg
-    alt : {(N,)} array like altitude, unit specified by alt_unit, default in m
-    
-    Returns
-    -------
-    ecef : {(N,3)} array like ecef position, unit is the same as alt_unit
-    """
-    lat, N1 = _input_check_Nx1(lat)
-    lon, N2 = _input_check_Nx1(lon)
-    alt, N3 = _input_check_Nx1(alt)
-
-    if ((N1 != N2) or (N2 != N3) or (N1 != N3)):
-        raise ValueError('Inputs are not of the same dimension')
-
-    Rew, Rns = earthrad(lat)
-
-    lat = np.deg2rad(lat)
-    lon = np.deg2rad(lon)
-
-    x = (Rew + alt) * np.cos(lat) * np.cos(lon)
-    y = (Rew + alt) * np.cos(lat) * np.sin(lon)
-    z = ((1 - constants.e_sqrd) * Rew + alt) * np.sin(lat)
-
-    ecef = np.vstack((x, y, z)).T
-
-    if (N1 == 1):
-        ecef = ecef.reshape(3)
-
-    return ecef
+def lla2ecef(phi, lon, alt):
+  R = math.pow(constants.a,2)/math.sqrt(math.pow(constants.a,2)*math.pow(math.cos(phi),2)+
+                                    math.pow(constants.b,2)*math.pow(math.sin(phi),2))
+  X = (R+alt)*math.cos(phi)*math.cos(lon)
+  Y = (R+alt)*math.cos(phi)*math.sin(lon)
+  Z = (math.pow(constants.a,2)*R/math.pow(constants.b,2)+alt)*math.sin(phi)
+  return [X, Y, Z]
 
 
 def ecef2lla(ecef):
@@ -117,12 +49,12 @@ def ecef2lla(ecef):
 
     p = np.sqrt(x ** 2 + y ** 2)
 
-    theta = np.arctan2((z * constants.a), (p * constants.b))
+    lon = np.arctan2((z * constants.a), (p * constants.b))
 
     lon = np.arctan2(y, x)
 
-    lat = np.arctan2((z + (constants.e2 ** 2) * constants.b * (np.sin(theta) ** 3)),
-                     ((p - (constants.e_sqrd) * constants.a * (np.cos(theta) ** 3))))
+    lat = np.arctan2((z + (constants.e2 ** 2) * constants.b * (np.sin(lon) ** 3)),
+                     ((p - (constants.e_sqrd) * constants.a * (np.cos(lon) ** 3))))
     N = constants.a / (np.sqrt(1 - ((constants.e_sqrd) * (np.sin(lat) ** 2))))
 
     m = (p / np.cos(lat))
@@ -414,12 +346,14 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     ecef = polar2ecef(r, bearing, elevation, ecef_ref)
     return ecef2lla(ecef)
 
+
 def enu2polar(x_east, y_north, z_up):
     projected_range = math.sqrt(x_east * x_east + y_north * y_north)
     range = math.sqrt(projected_range*projected_range + z_up * z_up)
     bearing = math.acos(y_north / projected_range)
     elevation = math.atan(z_up, projected_range)
     return range, bearing, elevation
+
 
 def polar2enu(range, bearing, elevation):
     projected_range = range * math.cos(elevation)
@@ -428,12 +362,14 @@ def polar2enu(range, bearing, elevation):
     z_up = range * math.sin(elevation)
     return x_east, y_north, z_up
 
+
 def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bearing, elevation):
   ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation)
   ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height)
   # ship_ECEF = lla2ecef(ownship_lat, ownship_long ,ownship_height)
   llhCoordinates = ecef2lla(ECEF_x, ECEF_y, ECEF_z)
   return llhCoordinates.get('height')
+
 
 def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
   transMat = [[-math.sin(long_ENU), -math.sin(lat_ENU)*math.cos(long_ENU), math.cos(lat_ENU)*math.cos(long_ENU)],

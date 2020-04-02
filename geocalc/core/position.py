@@ -432,7 +432,7 @@ def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bea
   ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation)
   ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height)
   # ship_ECEF = lla2ecef(ownship_lat, ownship_long ,ownship_height)
-  llhCoordinates = ecef2llh(ECEF_x, ECEF_y, ECEF_z)
+  llhCoordinates = ecef2lla(ECEF_x, ECEF_y, ECEF_z)
   return llhCoordinates.get('height')
 
 def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
@@ -445,3 +445,4 @@ def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
   # print(relativeCoordinates)
   Coordinates_new = np.add(transCoordinates, relativeCoordinates)
   return Coordinates_new
+

@@ -14,15 +14,36 @@ def directional_to_cartesian(speed, course, vz):
     return vx, vy, vz
 
 
-def cartesian_to_polar(vx, vy, vz):
-    range_rate = 1
-    bearing_rate = 1
-    elevation_rate = 1
+def enu2spherical(x, y, z, vx, vy, vz):
+    R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
+    r = math.sqrt(math.pow(x,2)+math.pow(y,2))
+    range_rate = (x*vx+y*vy+z*vz)/R
+    bearing_rate = (vx*y-x*vy)/math.pow(r,2)
+    elevation_rate = (vz*math.pow(r,2)-z*(x*vx+y*vy))/(r*math.pow(R,2))
     return range_rate, bearing_rate, elevation_rate
 
 
-def polar_to_ned_velocity(range, bearing, elevation, range_rate, bearing_rate, elevation_rate):
-    vx = 1
-    vy = 1
-    vz = 1
+def spherical2enu(range, bearing, elevation, range_rate, bearing_rate, elevation_rate):
+    r = range
+    rdot = range_rate
+    bdot = bearing_rate
+    edot = elevation_rate
+    cos_b = math.cos(bearing)
+    sin_b = math.sin(bearing)
+    cos_e = math.cos(elevation)
+    sin_e = math.sin(elevation)
+
+    vx = rdot*sin_b*cos_e + r*bdot*cos_b*cos_e - r*edot*sin_b*sin_e
+    vy = rdot*cos_b*cos_e - r*bdot*sin_b*cos_e - r*edot*cos_b*sin_e
+    vz = rdot*sin_e + r*edot*cos_e
     return vx, vy, vz
+
+#range_rate, bearing_rate, elevation_rate = enu2spherical(1, 1, 1, 1, 1, 1)
+#print(range_rate)
+#print(bearing_rate)
+#print(elevation_rate)
+
+vx, vy, vz = spherical2enu(1, 0, math.pi/2, 1, 0, 0)
+print(vx)
+print(1-vy)
+print(vz)

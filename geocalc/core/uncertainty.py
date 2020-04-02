@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 
 
@@ -67,3 +66,42 @@ def convert_uncertainty_ellipse_to_matrix(major, minor, angle, sigma=3):
     covar_xy = (major ** 2 - minor ** 2) * math.sin(angle_in_rad) * math.cos(angle_in_rad)
 
     return np.array([[var_x, covar_xy], [covar_xy, var_y]])
+
+
+def uncertainty3_spherical2cartesian(uncertainty):
+    return
+
+
+def uncertainty3_cartesian2spherical(uncertainty):
+    return
+
+
+def J3_spherical2cartesian(theta, r, phi):
+    cos_theta = math.cos(theta)
+    sin_theta = math.sin(theta)
+    cos_phi = math.cos(phi)
+    sin_phi = math.sin(phi)
+
+    J11 = r*cos_theta*cos_phi
+    J12 = sin_theta*cos_phi
+    J13 = -r*sin_theta*sin_phi
+    J21 = -r*sin_theta*cos_phi
+    J22 = cos_theta*cos_phi
+    J23 = -r*cos_theta*sin_phi
+    J31 = 0
+    J32 = sin_phi
+    J33 = r*cos_phi
+    return
+
+
+def J3_cartesian2spherical(uncertainty):
+    J11 = 0
+    J12 = 0
+    J13 = 0
+    J21 = 0
+    J22 = 0
+    J23 = 0
+    J31 = 0
+    J32 = 0
+    J33 = 0
+    return

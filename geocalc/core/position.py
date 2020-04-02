@@ -7,12 +7,17 @@ from geocalc.core.utils import input_check_Nx3 as _input_check_Nx3
 from geocalc.core.utils import positive_angle
 
 
-def lla2ecef(phi, lon, alt):
-  R = math.pow(constants.a,2)/math.sqrt(math.pow(constants.a,2)*math.pow(math.cos(phi),2)+
-                                    math.pow(constants.b,2)*math.pow(math.sin(phi),2))
-  X = (R+alt)*math.cos(phi)*math.cos(lon)
-  Y = (R+alt)*math.cos(phi)*math.sin(lon)
-  Z = (math.pow(constants.a,2)*R/math.pow(constants.b,2)+alt)*math.sin(phi)
+def lla2ecef(lat, lon, alt):
+    cos_lat = math.cos(math.radians(lat))
+    sin_lat = math.sin(math.radians(lat))
+    cos_lon = math.cos(math.radians(lon))
+    sin_lon = math.cos(math.radians(lon))
+
+    R = math.pow(constants.a,2)/math.sqrt(math.pow(constants.a,2)*math.pow(cos_lat,2)+
+                                    math.pow(constants.b,2)*math.pow(sin_lat,2))
+    X = (R+alt)*cos_lat*cos_lon
+    Y = (R+alt)*cos_lat*sin_lon
+    Z = (math.pow(constants.a,2)*R/math.pow(constants.b,2)+alt)*sin_lat
   return [X, Y, Z]
 
 
@@ -381,4 +386,3 @@ def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
   # print(relativeCoordinates)
   Coordinates_new = np.add(transCoordinates, relativeCoordinates)
   return Coordinates_new
-

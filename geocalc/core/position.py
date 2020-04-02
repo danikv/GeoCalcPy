@@ -427,3 +427,45 @@ def polar2enu(range, bearing, elevation):
     y_north = projected_range * math.cos(bearing)
     z_up = range * math.sin(elevation)
     return x_east, y_north, z_up
+
+# -------------------- FUNCTIONS IM ADDING -------------------------
+
+def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bearing, elevation):
+  ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation)
+  ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height)
+  # ship_ECEF = lla2ecef(ownship_lat, ownship_long ,ownship_height)
+  llhCoordinates = ecef2llh(ECEF_x, ECEF_y, ECEF_z)
+  return llhCoordinates.get('height')
+
+# https://www.google.com/url?q=https://en.wikipedia.org/wiki/Geographic_coordinate_conversion%23From_ECEF_to_ENU&sa=D&ust=1585471009058000&usg=AFQjCNHZnPywIbHKLNr9YY9Vg9B13eIGSg
+def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
+  transMat = [[-math.sin(long_ENU), -math.sin(lat_ENU)*math.cos(long_ENU), math.cos(lat_ENU)*math.cos(long_ENU)],
+              [math.cos(long_ENU), -math.sin(lat_ENU)*math.sin(long_ENU), math.cos(lat_ENU)*math.sin(long_ENU)],
+              [0, math.cos(lat_ENU), math.sin(lat_ENU)]]
+  transCoordinates = np.dot(transMat, [x,y,z])
+  # print(transCoordinates)
+  relativeCoordinates = lla2ecef(lat_ENU, long_ENU, h_ENU)
+  # print(relativeCoordinates)
+  Coordinates_new = np.add(transCoordinates, relativeCoordinates)
+  return Coordinates_new
+
+# https://www.google.com/url?q=https://gis.stackexchange.com/questions/265909/converting-from-ecef-to-geodetic-coordinates&sa=D&ust=1585470107026000&usg=AFQjCNGJEwOR2ohSKJ4bvlxiBbrHDxfWPw
+def ecef2llh(x,y,z):
+    clambda = math.atan2(y,x)
+    p = math.sqrt(pow(x,2.0)+pow(y,2))
+    h_old = 0.0
+    # first guess with h=0 meters
+    theta = math.atan2(z,p*(1.0-math.pow(e,2.0)))
+    cs = math.cos(theta)
+    sn = math.sin(theta)
+    N = math.pow(constants.a,2.0)/math.sqrt(math.pow(constants.a*cs,2.0)+math.pow(constants.c*sn,2.0))
+    h = p/cs - N
+    while abs(h-h_old) > 1.0e-6:
+        h_old = h
+        theta = math.atan2(z,p*(1.0-math.pow(e,2.0)*N/(N+h)))
+        cs = math.cos(theta)
+        sn = math.sin(theta)
+        N = math.pow(constants.a,2.0)/math.sqrt(math.pow(constants.a*cs,2.0)+math.pow(constants.c*sn,2.0))
+        h = p/cs - N
+    llh = {'long':clambda, 'lat':theta, 'height': h}
+    return llh

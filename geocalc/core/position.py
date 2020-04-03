@@ -17,7 +17,7 @@ def lla2ecef(lat, lon, alt, angle_in_radians = False):
     cos_lat = math.cos(lat)
     sin_lat = math.sin(lat)
     cos_lon = math.cos(lon)
-    sin_lon = math.cos(lon)
+    sin_lon = math.sin(lon)
 
     R = math.pow(constants.a,2)/math.sqrt(math.pow(constants.a,2)*math.pow(cos_lat,2)+
                                     math.pow(constants.b,2)*math.pow(sin_lat,2))

@@ -129,8 +129,8 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
 
     lat_ref, lon_ref = radiansChecker([lat_ref, lon_ref], angle_in_radians)
     ecef = ned2ecef(ned, lat_ref, lon_ref, alt_ref, True)
-    lla = ecef2lla(ecef) #In deg?
-    return lla
+    lla = ecef2lla(ecef) #In deg
+    return lla #In deg
 
 
 def ned2ecef(ned, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
@@ -348,13 +348,13 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref, angle_in_radians
     
     Returns
     -------
-    polar : range, bearing, elevation
+    polar : range, bearing, elevation - In deg.
     """
 
     bearing, elevation, lat_ref, lon_ref = radiansChecker([bearing, elevation, lat_ref, lon_ref], angle_in_radians)
     ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref, True)
     ecef = polar2ecef(r, bearing, elevation, ecef_ref, True)
-    return ecef2lla(ecef)
+    return ecef2lla(ecef) #In deg
 
 
 def enu2polar(x_east, y_north, z_up):
@@ -378,8 +378,8 @@ def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bea
     ownship_lat, ownship_long, bearing, elevation = radiansChecker([ownship_lat, ownship_long, bearing, elevation], angle_in_radians)
     ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation, True)
     ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height, True)
-    lat, lon, alt = ecef2lla(ECEF_x, ECEF_y, ECEF_z) #In deg?
-    return alt
+    lat, lon, alt = ecef2lla(ECEF_x, ECEF_y, ECEF_z) #In deg
+    return alt #In deg
 
 
 def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU, angle_in_radians = False):

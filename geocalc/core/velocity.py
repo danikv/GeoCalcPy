@@ -1,6 +1,5 @@
 import math
 
-
 def cartesian_to_directional(vx, vy, vz):
     speed = math.sqrt(vx * vx + vy * vy)
     course = math.degrees(math.atan2(vy, vx))
@@ -37,13 +36,3 @@ def spherical2enu(range, bearing, elevation, range_rate, bearing_rate, elevation
     vy = rdot*cos_b*cos_e - r*bdot*sin_b*cos_e - r*edot*cos_b*sin_e
     vz = rdot*sin_e + r*edot*cos_e
     return vx, vy, vz
-
-#range_rate, bearing_rate, elevation_rate = enu2spherical(1, 1, 1, 1, 1, 1)
-#print(range_rate)
-#print(bearing_rate)
-#print(elevation_rate)
-
-vx, vy, vz = spherical2enu(1, 0, math.pi/2, 1, 0, 0)
-print(vx)
-print(1-vy)
-print(vz)

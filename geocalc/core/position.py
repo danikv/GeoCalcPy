@@ -23,7 +23,7 @@ def lla2ecef(lat, lon, alt, angle_in_radians = False):
                                     math.pow(constants.b,2)*math.pow(sin_lat,2))
     X = (R+alt)*cos_lat*cos_lon
     Y = (R+alt)*cos_lat*sin_lon
-    Z = (math.pow(constants.a,2)*R/math.pow(constants.b,2)+alt)*sin_lat
+    Z = (math.pow(constants.b,2)*R/math.pow(constants.a,2)+alt)*sin_lat
     return X, Y, Z
 
 
@@ -60,12 +60,12 @@ def ecef2lla(ecef):
 
     p = np.sqrt(x ** 2 + y ** 2)
 
-    lon = np.arctan2((z * constants.a), (p * constants.b))
+    theta = np.arctan2((z * constants.a), (p * constants.b))
 
     lon = np.arctan2(y, x)
 
-    lat = np.arctan2((z + (constants.e2 ** 2) * constants.b * (np.sin(lon) ** 3)),
-                     ((p - (constants.e_sqrd) * constants.a * (np.cos(lon) ** 3))))
+    lat = np.arctan2((z + (constants.e2 ** 2) * constants.b * (np.sin(theta) ** 3)),
+                     ((p - (constants.e_sqrd) * constants.a * (np.cos(theta) ** 3))))
     N = constants.a / (np.sqrt(1 - ((constants.e_sqrd) * (np.sin(lat) ** 2))))
 
     m = (p / np.cos(lat))
@@ -129,7 +129,7 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
 
     lat_ref, lon_ref = radiansChecker([lat_ref, lon_ref], angle_in_radians)
     ecef = ned2ecef(ned, lat_ref, lon_ref, alt_ref, True)
-    lla = ecef2lla(ecef)
+    lla = ecef2lla(ecef) #In deg?
     return lla
 
 
@@ -378,7 +378,7 @@ def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bea
     ownship_lat, ownship_long, bearing, elevation = radiansChecker([ownship_lat, ownship_long, bearing, elevation], angle_in_radians)
     ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation, True)
     ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height, True)
-    lat, lon, alt = ecef2lla(ECEF_x, ECEF_y, ECEF_z)
+    lat, lon, alt = ecef2lla(ECEF_x, ECEF_y, ECEF_z) #In deg?
     return alt
 
 

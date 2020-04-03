@@ -6,19 +6,25 @@ from geocalc.core.utils import input_check_Nx1 as _input_check_Nx1
 from geocalc.core.utils import input_check_Nx3 as _input_check_Nx3
 from geocalc.core.utils import positive_angle
 
+def radiansChecker(deg, angle_in_radians = False):
+    if not angle_in_radians:
+        deg = np.radians(deg)
+    return deg
 
-def lla2ecef(lat, lon, alt):
-    cos_lat = math.cos(math.radians(lat))
-    sin_lat = math.sin(math.radians(lat))
-    cos_lon = math.cos(math.radians(lon))
-    sin_lon = math.cos(math.radians(lon))
+def lla2ecef(lat, lon, alt, angle_in_radians = False):
+    lat, lon = radiansChecker([lat, lon], angle_in_radians)
+
+    cos_lat = math.cos(lat)
+    sin_lat = math.sin(lat)
+    cos_lon = math.cos(lon)
+    sin_lon = math.cos(lon)
 
     R = math.pow(constants.a,2)/math.sqrt(math.pow(constants.a,2)*math.pow(cos_lat,2)+
                                     math.pow(constants.b,2)*math.pow(sin_lat,2))
     X = (R+alt)*cos_lat*cos_lon
     Y = (R+alt)*cos_lat*sin_lon
     Z = (math.pow(constants.a,2)*R/math.pow(constants.b,2)+alt)*sin_lat
-  return [X, Y, Z]
+    return X, Y, Z
 
 
 def ecef2lla(ecef):
@@ -71,7 +77,7 @@ def ecef2lla(ecef):
     return lat, lon, alt
 
 
-def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):
+def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', angle_in_radians = False):
     """
     Convert Latitude, Longitude, Altitude to its resolution in the NED
     coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
@@ -93,12 +99,13 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg'):
     -------
     ned : {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
-    ecef = lla2ecef(lat, lon, alt)
-    ned = ecef2ned(ecef, lat_ref, lon_ref, alt_ref)
+    lat, lon, lat_ref, lon_ref = radiansChecker([lat, lon, lat_ref, lon_ref], angle_in_radians)
+    ecef = lla2ecef(lat, lon, alt, True)
+    ned = ecef2ned(ecef, lat_ref, lon_ref, alt_ref, True)
     return ned
 
 
-def ned2lla(ned, lat_ref, lon_ref, alt_ref):
+def ned2lla(ned, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
     """
     Calculate the Latitude, Longitude and Altitude of points given by NED coordinates
     where NED origin given by lat_ref, lon_ref, and alt_ref.
@@ -120,14 +127,13 @@ def ned2lla(ned, lat_ref, lon_ref, alt_ref):
     This method is a wrapper on ned2ecef (add ecef of NED-origin) and ecef2lla.
     """
 
-    ecef = ned2ecef(ned, lat_ref, lon_ref, alt_ref)
-
+    lat_ref, lon_ref = radiansChecker([lat_ref, lon_ref], angle_in_radians)
+    ecef = ned2ecef(ned, lat_ref, lon_ref, alt_ref, True)
     lla = ecef2lla(ecef)
-
     return lla
 
 
-def ned2ecef(ned, lat_ref, lon_ref, alt_ref):
+def ned2ecef(ned, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
     """
     Transform a vector resolved in NED (origin given by lat_ref, lon_ref, and alt_ref)
     coordinates to its ECEF representation. 
@@ -160,6 +166,7 @@ def ned2ecef(ned, lat_ref, lon_ref, alt_ref):
     lat_ref, N1 = _input_check_Nx1(lat_ref)
     lon_ref, N2 = _input_check_Nx1(lon_ref)
     alt_ref, N3 = _input_check_Nx1(alt_ref)
+    lat_ref, lon_ref = radiansChecker([lat_ref, lon_ref], angle_in_radians)
 
     if ((N1 != 1) or (N2 != 1) or (N3 != 1)):
         raise ValueError('Reference Location can only be 1')
@@ -169,9 +176,6 @@ def ned2ecef(ned, lat_ref, lon_ref, alt_ref):
     ned = ned.T
 
     C = np.zeros((3, 3))
-
-    lat_ref = np.deg2rad(lat_ref)
-    lon_ref = np.deg2rad(lon_ref)
 
     C[0, 0] = -np.sin(lat_ref) * np.cos(lon_ref)
     C[0, 1] = -np.sin(lat_ref) * np.sin(lon_ref)
@@ -195,7 +199,7 @@ def ned2ecef(ned, lat_ref, lon_ref, alt_ref):
     return ecef
 
 
-def ecef2ned(ecef, lat_ref, lon_ref, alt_ref):
+def ecef2ned(ecef, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the NED
     coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
@@ -216,6 +220,7 @@ def ecef2ned(ecef, lat_ref, lon_ref, alt_ref):
     lat_ref, N1 = _input_check_Nx1(lat_ref)
     lon_ref, N2 = _input_check_Nx1(lon_ref)
     alt_ref, N3 = _input_check_Nx1(alt_ref)
+    lat_ref, lon_ref = radiansChecker([lat_ref, lon_ref], angle_in_radians)
 
     if ((N1 != 1) or (N2 != 1) or (N3 != 1)):
         raise ValueError('Reference Location can only be 1')
@@ -225,9 +230,6 @@ def ecef2ned(ecef, lat_ref, lon_ref, alt_ref):
     ecef = ecef.T
 
     C = np.zeros((3, 3))
-
-    lat_ref = np.deg2rad(lat_ref)
-    lon_ref = np.deg2rad(lon_ref)
 
     C[0, 0] = -np.sin(lat_ref) * np.cos(lon_ref)
     C[0, 1] = -np.sin(lat_ref) * np.sin(lon_ref)
@@ -281,7 +283,7 @@ def ecef2polar(ecef, ecef_ref):
     return r, bearing, elevation
 
 
-def lla2polar(lat, lon, alt, lat_ref, lon_ref, alt_ref):
+def lla2polar(lat, lon, alt, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
     """
     Transform a vector resolved in LLA coordinate to its resolution in the Polar
     coordinate.
@@ -296,12 +298,13 @@ def lla2polar(lat, lon, alt, lat_ref, lon_ref, alt_ref):
     polar : range, bearing, elevation
     """
 
-    ecef = lla2ecef(lat, lon, alt)
-    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
+    lat, lon, lat_ref, lon_ref = radiansChecker([lat, lon, lat_ref, lon_ref], angle_in_radians)
+    ecef = lla2ecef(lat, lon, alt, True)
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref, True)
     return ecef2polar(ecef, ecef_ref)
 
 
-def polar2ecef(r, bearing, elevation, ecef_ref):
+def polar2ecef(r, bearing, elevation, ecef_ref, angle_in_radians = False):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the Polar
     coordinate.
@@ -325,14 +328,15 @@ def polar2ecef(r, bearing, elevation, ecef_ref):
         y = ecef[1];
         z = ecef[2]
 
-    bearing, elevation = constants.half_pi - np.deg2rad(bearing), np.deg2rad(elevation)
+    bearing, elevation = radiansChecker([bearing, elevation], angle_in_radians)
+    bearing, elevation = constants.half_pi - bearing, elevation
     x = r * np.cos(bearing) * np.sin(elevation)
     y = r * np.sin(bearing) * np.sin(elevation)
     z = r * np.cos(elevation)
     return np.array([x, y, z]) + np.array(ecef_ref)
 
 
-def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
+def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref, angle_in_radians = False):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the Polar
     coordinate.
@@ -347,8 +351,9 @@ def polar2lla(r, bearing, elevation, lat_ref, lon_ref, alt_ref):
     polar : range, bearing, elevation
     """
 
-    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref)
-    ecef = polar2ecef(r, bearing, elevation, ecef_ref)
+    bearing, elevation, lat_ref, lon_ref = radiansChecker([bearing, elevation, lat_ref, lon_ref], angle_in_radians)
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref, True)
+    ecef = polar2ecef(r, bearing, elevation, ecef_ref, True)
     return ecef2lla(ecef)
 
 
@@ -360,7 +365,8 @@ def enu2polar(x_east, y_north, z_up):
     return range, bearing, elevation
 
 
-def polar2enu(range, bearing, elevation):
+def polar2enu(range, bearing, elevation, angle_in_radians = False):
+    bearing, elevation = radiansChecker([bearing, elevation], angle_in_radians)
     projected_range = range * math.cos(elevation)
     x_east = projected_range * math.sin(bearing)
     y_north = projected_range * math.cos(bearing)
@@ -368,21 +374,22 @@ def polar2enu(range, bearing, elevation):
     return x_east, y_north, z_up
 
 
-def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bearing, elevation):
-  ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation)
-  ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height)
-  # ship_ECEF = lla2ecef(ownship_lat, ownship_long ,ownship_height)
-  llhCoordinates = ecef2lla(ECEF_x, ECEF_y, ECEF_z)
-  return llhCoordinates.get('height')
+def polar_height2elevation(ownship_lat, ownship_long, ownship_height, range, bearing, elevation, angle_in_radians = False):
+    ownship_lat, ownship_long, bearing, elevation = radiansChecker([ownship_lat, ownship_long, bearing, elevation], angle_in_radians)
+    ENU_x, ENU_y, ENU_z = polar2enu(range, bearing, elevation, True)
+    ECEF_x, ECEF_y, ECEF_z = enu2ecef(ENU_x, ENU_y, ENU_z, ownship_lat, ownship_long, ownship_height, True)
+    lat, lon, alt = ecef2lla(ECEF_x, ECEF_y, ECEF_z)
+    return alt
 
 
-def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU):
-  transMat = [[-math.sin(long_ENU), -math.sin(lat_ENU)*math.cos(long_ENU), math.cos(lat_ENU)*math.cos(long_ENU)],
-              [math.cos(long_ENU), -math.sin(lat_ENU)*math.sin(long_ENU), math.cos(lat_ENU)*math.sin(long_ENU)],
-              [0, math.cos(lat_ENU), math.sin(lat_ENU)]]
-  transCoordinates = np.dot(transMat, [x,y,z])
-  # print(transCoordinates)
-  relativeCoordinates = lla2ecef(lat_ENU, long_ENU, h_ENU)
-  # print(relativeCoordinates)
-  Coordinates_new = np.add(transCoordinates, relativeCoordinates)
-  return Coordinates_new
+def enu2ecef(x, y, z, lat_ENU, long_ENU, h_ENU, angle_in_radians = False):
+    lat_ENU, long_ENU = radiansChecker([lat_ENU, long_ENU], angle_in_radians)
+    transMat = [[-math.sin(long_ENU), -math.sin(lat_ENU)*math.cos(long_ENU), math.cos(lat_ENU)*math.cos(long_ENU)],
+                [math.cos(long_ENU), -math.sin(lat_ENU)*math.sin(long_ENU), math.cos(lat_ENU)*math.sin(long_ENU)],
+                [0, math.cos(lat_ENU), math.sin(lat_ENU)]]
+    transCoordinates = np.dot(transMat, [x,y,z])
+    # print(transCoordinates)
+    relativeCoordinates = lla2ecef(lat_ENU, long_ENU, h_ENU, True)
+    # print(relativeCoordinates)
+    Coordinates_new = np.add(transCoordinates, relativeCoordinates)
+    return Coordinates_new

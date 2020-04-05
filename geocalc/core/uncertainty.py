@@ -69,11 +69,13 @@ def convert_uncertainty_ellipse_to_matrix(major, minor, angle, sigma=3):
 
 
 def uncertainty3_spherical2cartesian(uncertainty):
-    return
+    P = 0
+    return P
 
 
 def uncertainty3_cartesian2spherical(uncertainty):
-    return
+    P = 0
+    return P
 
 
 def J3_spherical2cartesian(theta, r, phi):
@@ -82,26 +84,33 @@ def J3_spherical2cartesian(theta, r, phi):
     cos_phi = math.cos(phi)
     sin_phi = math.sin(phi)
 
-    J11 = r*cos_theta*cos_phi
-    J12 = sin_theta*cos_phi
-    J13 = -r*sin_theta*sin_phi
-    J21 = -r*sin_theta*cos_phi
-    J22 = cos_theta*cos_phi
-    J23 = -r*cos_theta*sin_phi
-    J31 = 0
-    J32 = sin_phi
-    J33 = r*cos_phi
-    return
+    J3_11 = r*cos_theta*cos_phi
+    J3_12 = sin_theta*cos_phi
+    J3_13 = -r*sin_theta*sin_phi
+    J3_21 = -r*sin_theta*cos_phi
+    J3_22 = cos_theta*cos_phi
+    J3_23 = -r*cos_theta*sin_phi
+    J3_31 = 0
+    J3_32 = sin_phi
+    J3_33 = r*cos_phi
+
+    J3 = [[J3_11,J3_12,J3_13], [J3_21,J3_22,J3_23], [J3_31,J3_32, J3_33]]
+    return J3
 
 
 def J3_cartesian2spherical(uncertainty):
-    J11 = 0
-    J12 = 0
-    J13 = 0
-    J21 = 0
-    J22 = 0
-    J23 = 0
-    J31 = 0
-    J32 = 0
-    J33 = 0
-    return
+    [10:58, 5.4.2020] Noam Lin: R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
+    r = math.sqrt(math.pow(x,2)+math.pow(y,2))
+
+    J3_11 = y/math.pow(r,2)
+    J3_12 = x/math.pow(r,2)
+    J3_13 = 0
+    J3_21 = x/R
+    J3_22 = y/R
+    J3_23 = z/R
+    J3_31 = (x*z)/(math.pow(R,2)*r)
+    J3_32 = (y*z)/(math.pow(R,2)*r)
+    J3_33 = r/math.pow(R,2)
+
+    J3 = [[J3_11,J3_12,J3_13], [J3_21,J3_22,J3_23], [J3_31,J3_32, J3_33]]
+    return J3

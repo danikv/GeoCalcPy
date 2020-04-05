@@ -99,7 +99,7 @@ def J3_spherical2cartesian(theta, r, phi):
 
 
 def J3_cartesian2spherical(uncertainty):
-    [10:58, 5.4.2020] Noam Lin: R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
+    R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
     r = math.sqrt(math.pow(x,2)+math.pow(y,2))
 
     J3_11 = y/math.pow(r,2)

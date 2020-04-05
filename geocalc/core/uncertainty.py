@@ -98,7 +98,7 @@ def J3_spherical2cartesian(theta, r, phi):
     return J3
 
 
-def J3_cartesian2spherical(uncertainty):
+def J3_cartesian2spherical(x,y,z):
     R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
     r = math.sqrt(math.pow(x,2)+math.pow(y,2))
 

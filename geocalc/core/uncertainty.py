@@ -68,13 +68,17 @@ def convert_uncertainty_ellipse_to_matrix(major, minor, angle, sigma=3):
     return np.array([[var_x, covar_xy], [covar_xy, var_y]])
 
 
-def uncertainty3_spherical2cartesian(uncertainty):
-    P = 0
+def uncertainty3_spherical2cartesian(theta, r, phi, uncertainty):
+    J = J3_spherical2cartesian(theta, r, phi)
+    P = np.matmul(np.transpose(J), uncertainty)
+    P = np.matmul(P, J)
     return P
 
 
-def uncertainty3_cartesian2spherical(uncertainty):
-    P = 0
+def uncertainty3_cartesian2spherical(x, y, z, uncertainty):
+    J = J3_cartesian2spherical(x, y, z)
+    P = np.matmul(np.transpose(J), uncertainty)
+    P = np.matmul(P, J)
     return P
 
 
@@ -98,7 +102,7 @@ def J3_spherical2cartesian(theta, r, phi):
     return J3
 
 
-def J3_cartesian2spherical(x,y,z):
+def J3_cartesian2spherical(x, y, z):
     R = math.sqrt(math.pow(x,2)+math.pow(y,2)+math.pow(z,2))
     r = math.sqrt(math.pow(x,2)+math.pow(y,2))
 

@@ -70,23 +70,23 @@ def convert_uncertainty_ellipse_to_matrix(major, minor, angle, sigma=3):
 
 def uncertainty3_spherical2cartesian(theta, r, phi, uncertainty):
     J = J3_spherical2cartesian(theta, r, phi)
-    P = np.matmul(np.transpose(J), uncertainty)
-    P = np.matmul(P, J)
+    P = np.matmul(J, uncertainty)
+    P = np.matmul(P, np.transpose(J))
     return P
 
 
 def uncertainty3_cartesian2spherical(x, y, z, uncertainty):
     J = J3_cartesian2spherical(x, y, z)
-    P = np.matmul(np.transpose(J), uncertainty)
-    P = np.matmul(P, J)
+    P = np.matmul(J, uncertainty)
+    P = np.matmul(P, np.transpose(J))
     return P
 
 
 def J3_spherical2cartesian(theta, r, phi):
-    cos_theta = math.cos(theta)
-    sin_theta = math.sin(theta)
-    cos_phi = math.cos(phi)
-    sin_phi = math.sin(phi)
+    cos_theta = math.cos(np.radians(theta))
+    sin_theta = math.sin(np.radians(theta))
+    cos_phi = math.cos(np.radians(phi))
+    sin_phi = math.sin(np.radians(phi))
 
     J3_11 = r*cos_theta*cos_phi
     J3_12 = sin_theta*cos_phi
@@ -122,23 +122,23 @@ def J3_cartesian2spherical(x, y, z):
 
 def uncertainty6_spherical2cartesian(theta, r, phi, range_rate, bearing_rate, elevation_rate, uncertainty):
     J = J6_spherical2cartesian(theta, r, phi, range_rate, bearing_rate, elevation_rate)
-    P = np.matmul(np.transpose(J), uncertainty)
-    P = np.matmul(P, J)
+    P = np.matmul(J, uncertainty)
+    P = np.matmul(P, np.transpose(J))
     return P
 
 
 def uncertainty6_cartesian2spherical(x, y, z, vx, vy, vz, uncertainty):
     J = J6_cartesian2spherical(x, y, z, vx, vy, vz)
-    P = np.matmul(np.transpose(J), uncertainty)
-    P = np.matmul(P, J)
+    P = np.matmul(J, uncertainty)
+    P = np.matmul(P, np.transpose(J))
     return P
 
 
 def J6_spherical2cartesian(theta, r, phi, r_dot, theta_dot, phi_dot):
-    cos_theta = math.cos(theta)
-    sin_theta = math.sin(theta)
-    cos_phi = math.cos(phi)
-    sin_phi = math.sin(phi)
+    cos_theta = math.cos(np.radians(theta))
+    sin_theta = math.sin(np.radians(theta))
+    cos_phi = math.cos(np.radians(phi))
+    sin_phi = math.sin(np.radians(phi))
 
     
     J6 = np.zeros((6, 6))
@@ -154,12 +154,12 @@ def J6_spherical2cartesian(theta, r, phi, r_dot, theta_dot, phi_dot):
     J6[2][6] = -r*sin_theta*sin_phi
 
     J6[3][1] = -r*sin_theta*cos_phi
-    J6[3][3] = sin_theta*cos_phi
+    J6[3][3] = cos_theta*cos_phi
     J6[3][5] = -r*cos_theta*sin_phi
 
-    J6[4][1] = -r_dot*sin_theta*cos_phi - theta_dot*r*cos_theta*cos_phi + phi_dot*r*cos_theta*sin_phi
+    J6[4][1] = -r_dot*sin_theta*cos_phi - theta_dot*r*cos_theta*cos_phi + phi_dot*r*sin_theta*sin_phi
     J6[4][2] = -r*sin_theta*cos_phi
-    J6[4][3] = -theta_dot*sin_theta*cos_phi - phi_dot*sin_theta*sin_phi
+    J6[4][3] = -theta_dot*sin_theta*cos_phi - phi_dot*cos_theta*sin_phi
     J6[4][4] = cos_theta*cos_phi
     J6[4][5] = -r_dot*cos_theta*sin_phi + theta_dot*r*sin_theta*sin_phi - phi_dot*r*cos_theta*cos_phi
     J6[4][6] = -r*cos_theta*sin_phi
@@ -183,9 +183,9 @@ def J6_cartesian2spherical(x, y, z, vx, vy, vz):
     J6[1][1] = y/(r**2)
     J6[1][3] = -x/(r**2)
 
-    J6[2][1] = ((x**2-y**2)*vx-2*x*y*vy)/(r**4)
+    J6[2][1] = ((x**2-y**2)*vy-2*x*y*vx)/(r**4)
     J6[2][2] = y/(r**2)
-    J6[2][3] = ((x**2-y**2)*vy-2*x*y*vx)/(r**4)
+    J6[2][3] = ((x**2-y**2)*vx-2*x*y*vy)/(r**4)
     J6[2][4] = -x/(r**2)
 
     J6[3][1] = x/R
